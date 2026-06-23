@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="loader" class="hidden"><div class="loading-spinner"></div></div>
+  <div id="error-panel" class="hidden"><div class="error-message"><span id="error-message"></span><button id="close-error" type="button">Dismiss</button></div></div>
+
+  <main id="app">
+    <header class="top-bar">
+      <div>
+        <p class="eyebrow">Live weather</p>
+        <h1>Weather Studio</h1>
+      </div>
+      <div class="top-actions">
+        <button id="theme-button" type="button" class="icon-button">light theme</button>
+      </div>
+    </header>
+
+    <section class="glass-card search-panel">
+      <div class="search-header">
+        <div>
+          <p class="eyebrow">Find accurate weather</p>
+          <h2>Search any city</h2>
+        </div>
+        <button id="clear-button" type="button" class="ghost">Clear</button>
+      </div>
+
+      <form id="search-form" class="search-form">
+        <input id="city-input" type="search" placeholder="Enter city name" autocomplete="off" />
+        <button id="search-button" type="submit">Search</button>
+      </form>
+
+      <div class="search-actions">
+        <button id="current-location-button" type="button">Use my location</button>
+        <button id="refresh-button" type="button">Refresh</button>
+      </div>
+    </section>
+
+    <section class="glass-card weather-panel hidden" id="weather-card">
+      <div class="weather-top-row">
+        <div class="weather-meta">
+          <p class="eyebrow" id="city-name">Pune</p>
+          <h2 id="date-time">Loading current weather</h2>
+        </div>
+        <div class="weather-icon-large" id="weather-icon">☀️</div>
+      </div>
+
+      <div class="weather-details">
+        <div class="weather-display">
+          <div class="temp-value" id="current-temp">0°</div>
+          <p id="weather-desc">Clear sky</p>
+        </div>
+        <div class="weather-tags">
+          <span class="tag" id="condition-tag">Clear</span>
+          <span class="tag" id="cache-tag">Live</span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><span>Feels like</span><strong id="feels-like">--</strong></div>
+        <div class="stat-card"><span>Humidity</span><strong id="humidity">--</strong></div>
+        <div class="stat-card"><span>Wind</span><strong id="wind">--</strong></div>
+        <div class="stat-card"><span>Pressure</span><strong id="pressure">--</strong></div>
+        <div class="stat-card"><span>Visibility</span><strong id="visibility">--</strong></div>
+        <div class="stat-card"><span>UV index</span><strong id="uv-index">--</strong></div>
+        <div class="stat-card"><span>Sunrise</span><strong id="sunrise">--</strong></div>
+        <div class="stat-card"><span>Sunset</span><strong id="sunset">--</strong></div>
+      </div>
+
+      <div class="forecast-block">
+        <div class="forecast-head"><h3>Hourly</h3></div>
+        <div id="hourly-forecast" class="forecast-list"></div>
+      </div>
+
+      <div class="forecast-block">
+        <div class="forecast-head"><h3>7-Day</h3></div>
+        <div id="daily-forecast" class="forecast-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
