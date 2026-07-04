@@ -220,7 +220,7 @@ input {
 }
 
 .stat-card span {
-  color: var(--muted);
+  color: rgb(5 5 5);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.82rem;
@@ -228,6 +228,7 @@ input {
 
 .stat-card strong {
   font-size: 1.2rem;
+  color: rgb(5 5 5);
 }
 
 .forecast-block {

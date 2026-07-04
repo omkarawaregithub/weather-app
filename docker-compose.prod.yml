@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  jenkins-weather-app:
+    image: ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/jenkins-weather-app:${BUILD_NUMBER}
+    container_name: jenkins-weather-app-prod
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENWEATHERMAP_API_KEY=${OPENWEATHERMAP_API_KEY}
+      - SPRING_PROFILES_ACTIVE=prod
+      - JAVA_OPTS=-Xmx2g -Xms1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200
+      - LOG_LEVEL=WARN
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/weather?city=Pune"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: always
+    networks:
+      - jenkins-network-prod
+    volumes:
+      - app-logs-prod:/app/logs
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+volumes:
+  app-logs-prod:
+
+networks:
+  jenkins-network-prod:
+    driver: bridge

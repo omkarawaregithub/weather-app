@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  jenkins-weather-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jenkins-weather-app:latest
+    container_name: jenkins-weather-app-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENWEATHERMAP_API_KEY=${OPENWEATHERMAP_API_KEY}
+      - SPRING_PROFILES_ACTIVE=dev
+      - JAVA_OPTS=-Xmx512m -Xms256m
+      - LOG_LEVEL=DEBUG
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/weather?city=Pune"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - jenkins-network-dev
+    volumes:
+      - app-logs-dev:/app/logs
+
+volumes:
+  app-logs-dev:
+
+networks:
+  jenkins-network-dev:
+    driver: bridge

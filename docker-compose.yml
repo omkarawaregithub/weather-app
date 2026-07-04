@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  jenkins-weather-app:
+    image: jenkins-weather-app:latest
+    container_name: jenkins-weather-app-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENWEATHERMAP_API_KEY=${OPENWEATHERMAP_API_KEY}
+      - SPRING_PROFILES_ACTIVE=dev
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/weather?city=Pune"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - jenkins-network
+    volumes:
+      - app-logs:/app/logs
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins-server
+    ports:
+      - "9090:8080"
+      - "50000:50000"
+    environment:
+      - JENKINS_OPTS=-Djenkins.install.runSetupWizard=false
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - jenkins-network
+    restart: unless-stopped
+
+volumes:
+  app-logs:
+  jenkins-home:
+
+networks:
+  jenkins-network:
+    driver: bridge
