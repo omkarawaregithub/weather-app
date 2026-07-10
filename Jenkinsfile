@@ -7,63 +7,138 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = 'jenkins-weather-app:latest'
+        DOCKER_IMAGE = 'jenkins-weather-app'
+        IMAGE_TAG = "${BUILD_NUMBER}"
         CONTAINER_NAME = 'jenkins-weather-app'
+        HOST_PORT = '8081'
+        CONTAINER_PORT = '8080'
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                echo 'Checking out source code'
+                echo "========== CHECKOUT =========="
                 checkout scm
             }
         }
 
-        stage('Build') {
+        stage('Verify Tools') {
             steps {
-                echo 'Building the Spring Boot application'
-                sh 'mvn clean test'
+                sh '''
+                    java -version
+                    mvn -version
+                    docker --version
+                '''
+            }
+        }
+
+        stage('Clean') {
+            steps {
+                sh 'mvn clean'
+            }
+        }
+
+        stage('Compile') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+
+        stage('Unit Test') {
+            steps {
+                sh 'mvn test'
             }
         }
 
         stage('Package') {
             steps {
-                echo 'Packaging the application'
-                sh 'mvn clean package -DskipTests'
+                sh 'mvn package -DskipTests'
+            }
+        }
+
+        stage('Verify Artifact') {
+            steps {
+                sh '''
+                    echo "Generated JAR:"
+                    ls -lh target/*.jar
+                '''
             }
         }
 
         stage('Docker Build') {
             steps {
-                echo 'Building Docker image'
-                sh "docker build -t ${DOCKER_IMAGE} ."
+                sh """
+                    docker build \
+                    -t ${DOCKER_IMAGE}:${IMAGE_TAG} \
+                    -t ${DOCKER_IMAGE}:latest .
+                """
             }
         }
 
-        stage('Deploy') {
+        stage('Verify Docker Image') {
             steps {
-                echo 'Deploying Docker container'
+                sh "docker images | grep ${DOCKER_IMAGE}"
+            }
+        }
+
+        stage('Deploy Container') {
+            steps {
                 sh """
-                    docker rm -f ${CONTAINER_NAME} >/dev/null 2>&1 || true
+                    docker stop ${CONTAINER_NAME} || true
+                    docker rm ${CONTAINER_NAME} || true
+
                     docker run -d \
-                        --name ${CONTAINER_NAME} \
-                        -p 8081:8080 \
-                        ${DOCKER_IMAGE}
+                      --name ${CONTAINER_NAME} \
+                      -p ${HOST_PORT}:${CONTAINER_PORT} \
+                      ${DOCKER_IMAGE}:${IMAGE_TAG}
                 """
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                sh '''
+                    sleep 15
+                    curl -I http://localhost:8081
+                '''
+            }
+        }
+
+        stage('Running Containers') {
+            steps {
+                sh 'docker ps'
+            }
+        }
+
+        stage('Cleanup Old Images') {
+            steps {
+                sh '''
+                    docker image prune -f
+                '''
             }
         }
     }
 
     post {
+
+        success {
+            echo '================================='
+            echo 'Pipeline executed successfully!'
+            echo 'Application is deployed.'
+            echo '================================='
+        }
+
+        failure {
+            echo '================================='
+            echo 'Pipeline failed!'
+            echo 'Container Logs:'
+            sh 'docker logs ${CONTAINER_NAME} || true'
+            echo '================================='
+        }
+
         always {
             echo 'Pipeline completed.'
-        }
-        success {
-            echo 'Build and deployment succeeded.'
-        }
-        failure {
-            echo 'Build or deployment failed.'
         }
     }
 }
