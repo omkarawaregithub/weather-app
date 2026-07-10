@@ -1,12 +1,5 @@
 package com.jenkins_project.jenkins_project.weather;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -26,6 +19,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class WeatherService {
 
@@ -38,8 +39,8 @@ public class WeatherService {
     private final ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<>();
 
     public WeatherService(
-            @Value("${openweathermap.api.key}") String apiKey,
-            @Value("${openweathermap.api.base-url}") String apiBaseUrl,
+            @Value("${openweathermap.api.key:}") String apiKey,
+            @Value("${openweathermap.api.base-url:https://api.openweathermap.org}") String apiBaseUrl,
             @Value("${openweathermap.api.default-city:London}") String defaultCity
     ) {
         this.apiKey = apiKey != null ? apiKey.trim() : "";
@@ -55,6 +56,10 @@ public class WeatherService {
     public WeatherResponse getWeather(String city, Double lat, Double lon) {
         if ((city == null || city.isBlank()) && (lat == null || lon == null)) {
             city = defaultCity;
+        }
+
+        if (apiKey == null || apiKey.isBlank()) {
+            return getDemoWeather(city, lat, lon);
         }
 
         String cacheKey = buildCacheKey(city, lat, lon);

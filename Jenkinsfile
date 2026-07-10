@@ -41,7 +41,6 @@ pipeline {
                 sh '''
                 docker rm -f ${CONTAINER_NAME} >/dev/null 2>&1 || true
                 docker run -d --name ${CONTAINER_NAME} -p 8080:8080 \
-                    -e OPENWEATHERMAP_API_KEY=${OPENWEATHERMAP_API_KEY} \
                     ${DOCKER_IMAGE}
                 '''
             }
