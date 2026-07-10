@@ -48,7 +48,7 @@ pipeline {
                     docker rm -f ${CONTAINER_NAME} >/dev/null 2>&1 || true
                     docker run -d \
                         --name ${CONTAINER_NAME} \
-                        -p 8080:8080 \
+                        -p 8081:8080 \
                         ${DOCKER_IMAGE}
                 """
             }
